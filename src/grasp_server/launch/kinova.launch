@@ -1,0 +1,5 @@
+<launch>
+    <!--<include file="$(find kinova_bringup)/launch/kinova_robot.launch"/>-->
+	<include file="$(find m1n6s200_moveit_config)/launch/m1n6s200_demo.launch"/>
+    <node name="publish_marker" pkg="grasp_server" type="publish_marker.py" />
+</launch>

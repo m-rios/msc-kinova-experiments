@@ -1,0 +1,9 @@
+<launch>
+
+    <include file="$(find openni2_launch)/launch/openni2.launch" />
+    <include file="$(find m1n6s200_moveit_config)/launch/m1n6s200_demo.launch" />
+    <include file="$(find moveit_grasp)/launch/tf.launch" />
+    <node name="filter" pkg="alice_pointcloud" type="filter_node" />
+    <!--node name="alice_object" pkg="alice_object" type="alice_object_node" /-->
+    
+</launch>
