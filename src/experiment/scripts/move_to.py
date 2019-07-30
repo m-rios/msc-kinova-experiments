@@ -1,5 +1,5 @@
 import rospy
-from moveit import MoveIt
+from arm_controller import ArmController
 import argparse
 import numpy as np
 
@@ -11,6 +11,6 @@ if __name__ == '__main__':
     pose[3:] = np.radians(pose[3:])
 
     rospy.init_node('move_kinova_to')
-    moveit = MoveIt()
+    controller = ArmController()
     # moveit.move_to(0.37, -0.24, 0.1, math.pi , 0., 0.)
-    moveit.move_to(*pose)
+    controller.move_to(*pose)
