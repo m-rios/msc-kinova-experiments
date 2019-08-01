@@ -22,9 +22,12 @@ if __name__ == '__main__':
    rospy.sleep(1)
 
    onet = OrthoNet()
+   # position, orientation, y, width = onet.predict(xyzs, roi=[-2, 1, -.15, .25, 0, 0.2], predictor=OrthoNet.manual_predictor)
    position, orientation, angle, width = onet.predict(xyzs, roi=[-2, 1, -.15, .25, 0, 0.2], predictor=OrthoNet.manual_predictor)
-   # position = np.array([[-0.03678347, -0.14620348,  0.67425354]])
-   # orientation = np.array([[-0.02538166, -0.73814097,  0.84091622]])
+   print('Orientation {}'.format(orientation))
+   print('Angle: {}'.format(angle))
+   angle = np.arccos(np.dot(orientation.squeeze(), angle.squeeze()))
+   print('Angle: {}'.format(np.degrees(angle)))
 
    tr, qt = listener.lookupTransform('m1n6s200_link_base', 'camera_depth_optical_frame', rospy.Time(0))
 
@@ -33,7 +36,10 @@ if __name__ == '__main__':
    position = np.add(position, tr)
 
    orientation = r.apply(orientation)
-   orientation = np.add(orientation, tr)
+
+   # quat = R.from_rotvec(orientation).as_quat()
+   # rpy = R.from_rotvec(orientation*angle).as_euler('zyx')
+   # quat = quaternion_from_euler(rpy[0, 0], rpy[0, 1], rpy[0, 2])
 
    pose = PoseStamped()
    pose.header.frame_id = 'm1n6s200_link_base'
@@ -48,7 +54,15 @@ if __name__ == '__main__':
    pose.pose.orientation.z = orientation[0, 2] * s
    pose.pose.orientation.w = np.cos(angle/2.)
 
+   # pose.pose.orientation.x = quat[0, 3]
+   # pose.pose.orientation.y = quat[0, 0]
+   # pose.pose.orientation.z = quat[0, 1]
+   # pose.pose.orientation.w = quat[0, 2]
 
+   # pose.pose.orientation.x = quat[3]
+   # pose.pose.orientation.y = quat[0]
+   # pose.pose.orientation.z = quat[1]
+   # pose.pose.orientation.w = quat[2]
    # print 'sending'
    pub.publish(pose)
 
@@ -59,6 +73,7 @@ if __name__ == '__main__':
    # r, p, yw = euler_from_quaternion(quat)
    # controller.grasp(x, y, z, r, p, yw)
    # controller.open_fingers()
+   # controller.move_to(0, -0.2, .3, -np.pi, 0, 0)
 
 
 

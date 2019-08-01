@@ -167,7 +167,7 @@ class ArmController(object):
         self.scene.add_box(name, object_pose, size)
         
     def add_table(self):
-        self.add_object('table', [0, 0, -0.005, 0, 0, 0], (2, 2, 0.01))
+        self.add_object('table', [0, 0, -0.005, 0, 0, 0], (20, 20, 0.01))
 
 
 
