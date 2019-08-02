@@ -18,7 +18,6 @@ class ArmController(object):
     def __init__(self):
         moveit_commander.roscpp_initialize(sys.argv)
         self.scene = PlanningSceneInterface()
-        self.add_table()
         # self.clear_octomap = rospy.ServiceProxy("/clear_octomap", Empty)
 
         self.arm = MoveGroupCommander("arm")
@@ -36,6 +35,7 @@ class ArmController(object):
         self.transformer = tf.TransformListener()
 
         rospy.sleep(2) # allow some time for initialization of moveit
+        self.add_table()
 
     def __del__(self):
         moveit_commander.roscpp_shutdown()
@@ -103,8 +103,22 @@ class ArmController(object):
         return [grasp]
 
     # Template function, you can add parameters if needed!
+    def plan_grasp(self, x, y, z, roll, pitch, yaw):
+        self.add_object('object', [0.37, -0.24, 0.1, math.pi, 0., 0.], [0.1, 0.1, 0.1])
+
+        grasps = self._create_grasp(x, y, z, roll, pitch, yaw)
+        result = self.arm.pick('object', grasps, plan_only=True)
+        self.remove_object()
+
+        if result == MoveItErrorCodes.SUCCESS:
+            print
+            'Success grasp'
+            return True
+        else:
+            print
+            'Failed grasp'
+            return False
     def grasp(self, x, y, z, roll, pitch, yaw):
-        print 'Grasp: {} {} {}::{} {} {}'.format(x, y, z, roll, pitch, yaw)
         self.add_object('object', [0.37, -0.24, 0.1, math.pi , 0., 0.], [0.1, 0.1, 0.1])
 
         grasps = self._create_grasp(x, y, z, roll, pitch, yaw)
@@ -167,8 +181,7 @@ class ArmController(object):
         self.scene.add_box(name, object_pose, size)
         
     def add_table(self):
-        self.add_object('table', [0, 0, -0.05, 0, 0, 0], (20, 20, 0.01))
-        # self.add_object('table', [0, 0, -0.05, 0, 0, 0], (20, 20, 0.5))
+        self.add_object('table', [0, 0, -0.05, 0, 0, 0], (2, 2, 0.01))
         rospy.sleep(1)
 
 

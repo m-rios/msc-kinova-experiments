@@ -50,46 +50,54 @@ if __name__ == '__main__':
     rospy.sleep(1)
 
     onet = OrthoNet()
+    controller = ArmController()
     while not rospy.is_shutdown():
-        position, z, y, width = onet.predict(xyzs, roi=[-2, 1, -.15, .25, 0, 0.2], predictor=OrthoNet.manual_predictor)
+        positions, zs, ys, widths = onet.predict(xyzs, roi=[-2, 1, -.15, .25, 0, 0.2], predictor=OrthoNet.manual_predictor)
 
-        position = position.squeeze()
-        z = z.squeeze()
-        y = y.squeeze()
-        x = np.cross(y, z)
+        for idx in range(len(positions)):
+            position = positions[idx]
+            z = zs[idx]
+            y = ys[idx]
+            width = widths[idx]
 
-        r = np.vstack((x, y, z)).T
+            position = position.squeeze()
+            z = z.squeeze()
+            y = y.squeeze()
+            x = np.cross(y, z)
 
-        rpy = euler_from_matrix(r)
-        q = quaternion_from_euler(rpy[0], rpy[1], rpy[2])
+            r = np.vstack((x, y, z)).T
 
-        pose = PoseStamped()
-        # pose.header.frame_id = 'm1n6s200_link_base'
-        pose.header.frame_id = 'camera_depth_optical_frame'
-        pose.header.stamp = rospy.Time.now()
-        pose.pose.position.x = position[0]
-        pose.pose.position.y = position[1]
-        pose.pose.position.z = position[2]
-        pose.pose.orientation.x = q[0]
-        pose.pose.orientation.y = q[1]
-        pose.pose.orientation.z = q[2]
-        pose.pose.orientation.w = q[3]
+            rpy = euler_from_matrix(r)
+            q = quaternion_from_euler(rpy[0], rpy[1], rpy[2])
 
-        print pose
-        pose = listener.transformPose('m1n6s200_link_base', pose)
-        print pose
+            pose = PoseStamped()
+            pose.header.frame_id = 'camera_depth_optical_frame'
+            pose.header.stamp = rospy.Time.now()
+            pose.pose.position.x = position[0]
+            pose.pose.position.y = position[1]
+            pose.pose.position.z = position[2]
+            pose.pose.orientation.x = q[0]
+            pose.pose.orientation.y = q[1]
+            pose.pose.orientation.z = q[2]
+            pose.pose.orientation.w = q[3]
 
-        pub.publish(pose)
-        rospy.sleep(1)
+            pose = listener.transformPose('m1n6s200_link_base', pose)
 
-        controller = ArmController()
-        p = pose.pose.position
-        x, y, z = (p.x, p.y, p.z)
-        p = pose.pose.orientation
-        quat = [p.x, p.y, p.z, p.w]
-        r, p, yw = euler_from_quaternion(quat)
-        controller.grasp(x, y, z, r, p, yw)
-        controller.open_fingers()
-        controller.move_to(0, -0.2, .3, -np.pi, 0, 0)
-        # raw_input('Press ENTER to continue')
+            pub.publish(pose)
+            rospy.sleep(1)
+
+
+            p = pose.pose.position
+            x, y, z = (p.x, p.y, p.z)
+            p = pose.pose.orientation
+            quat = [p.x, p.y, p.z, p.w]
+            r, p, yw = euler_from_quaternion(quat)
+            if controller.plan_grasp(x, y, z, r, p, yw):
+                print 'Found successful grasp'
+                controller.grasp(x, y, z, r, p, yw)
+                controller.open_fingers()
+                controller.move_to(0, -0.2, .3, -np.pi, 0, 0)
+                break
+            else:
+                print 'Grasp unsuccessful, skipping'
         break
