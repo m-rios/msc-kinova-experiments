@@ -104,7 +104,7 @@ class ArmController(object):
 
     # Template function, you can add parameters if needed!
     def grasp(self, x, y, z, roll, pitch, yaw):
-
+        print 'Grasp: {} {} {}::{} {} {}'.format(x, y, z, roll, pitch, yaw)
         self.add_object('object', [0.37, -0.24, 0.1, math.pi , 0., 0.], [0.1, 0.1, 0.1])
 
         grasps = self._create_grasp(x, y, z, roll, pitch, yaw)
@@ -167,7 +167,9 @@ class ArmController(object):
         self.scene.add_box(name, object_pose, size)
         
     def add_table(self):
-        self.add_object('table', [0, 0, -0.005, 0, 0, 0], (20, 20, 0.01))
+        self.add_object('table', [0, 0, -0.05, 0, 0, 0], (20, 20, 0.01))
+        # self.add_object('table', [0, 0, -0.05, 0, 0, 0], (20, 20, 0.5))
+        rospy.sleep(1)
 
 
 
