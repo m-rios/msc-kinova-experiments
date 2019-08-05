@@ -131,7 +131,7 @@
             <child link="${prefix}link_finger_tip_${finger_number}"/>
             <axis xyz="0 0 1"/>
             <origin xyz="0.044 -0.003 0" rpy="0 0 0"/>
-            <limit lower="0" upper="2" effort="1" velocity="1"/>
+            <limit lower="0" upper="2.5" effort="1" velocity="1"/>
         </joint>
 
     </xacro:macro>

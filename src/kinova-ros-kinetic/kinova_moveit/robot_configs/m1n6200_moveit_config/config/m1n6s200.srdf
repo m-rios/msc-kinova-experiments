@@ -43,8 +43,8 @@
         <joint name="m1n6s200_joint_finger_2" value="0.2" />
     </group_state>
     <group_state name="Close" group="gripper">
-        <joint name="m1n6s200_joint_finger_1" value="1.2" />
-        <joint name="m1n6s200_joint_finger_2" value="1.2" />
+        <joint name="m1n6s200_joint_finger_1" value="1.35" />
+        <joint name="m1n6s200_joint_finger_2" value="1.35" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="end_effector" parent_link="m1n6s200_end_effector" group="gripper" parent_group="arm" />

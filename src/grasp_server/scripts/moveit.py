@@ -53,6 +53,18 @@ class MoveIt(object):
         joint_trajectory.points.append(joint_trajectory_point)
         return joint_trajectory
 
+    def _set_gripper_width(self, width):
+        joint_trajectory = JointTrajectory()
+        joint_trajectory.header.stamp = rospy.get_rostime()
+        joint_trajectory.joint_names = ["m1n6s200_joint_finger_1", "m1n6s200_joint_finger_2"]
+
+        joint_trajectory_point = JointTrajectoryPoint()
+        joint_trajectory_point.positions = [0, 0]
+        joint_trajectory_point.time_from_start = rospy.Duration(5.0)
+
+        joint_trajectory.points.append(joint_trajectory_point)
+        return joint_trajectory
+
     def _close_gripper(self):
         joint_trajectory = JointTrajectory()
         joint_trajectory.header.stamp = rospy.get_rostime()
@@ -102,7 +114,7 @@ class MoveIt(object):
         return [grasp]
 
     # Template function, you can add parameters if needed!
-    def grasp(self, x, y, z, roll, pitch, yaw):
+    def grasp(self, x, y, z, roll, pitch, yaw, width):
 
         self.add_object('object', [0.37, -0.24, 0.1, math.pi , 0., 0.], [0.1, 0.1, 0.1])
 
@@ -126,6 +138,7 @@ class MoveIt(object):
         self.gripper.set_joint_value_target([1.3, 1.3])
         self.gripper.go(wait=True)
         rospy.sleep(2.0)
+
 
     def move_to(self, x, y, z, roll, pitch, yaw, frame_id ="m1n6s200_link_base"):
         q = quaternion_from_euler(roll, pitch, yaw)

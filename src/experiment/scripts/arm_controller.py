@@ -65,13 +65,25 @@ class ArmController(object):
         joint_trajectory.points.append(joint_trajectory_point)
         return joint_trajectory
 
+    def _set_gripper_width(self, width):
+        joint_trajectory = JointTrajectory()
+        joint_trajectory.header.stamp = rospy.get_rostime()
+        joint_trajectory.joint_names = ["m1n6s200_joint_finger_1", "m1n6s200_joint_finger_2"]
+
+        theta = self.width_to_angle(width)
+        joint_trajectory_point = JointTrajectoryPoint()
+        joint_trajectory_point.positions = [theta, theta]
+        joint_trajectory_point.time_from_start = rospy.Duration(5.0)
+
+        joint_trajectory.points.append(joint_trajectory_point)
+        return joint_trajectory
 
     # Template function for creating the Grasps
-    def _create_grasp(self, x, y, z, roll, pitch, yaw):
+    def _create_grasp(self, x, y, z, roll, pitch, yaw, width):
         grasp = Grasp()
 
         # pre_grasp
-        grasp.pre_grasp_posture = self._open_gripper()
+        grasp.pre_grasp_posture = self._set_gripper_width(width)
         grasp.pre_grasp_approach.direction.header.frame_id = self.end_effector_link
         grasp.pre_grasp_approach.direction.vector.z = 1.0
         grasp.pre_grasp_approach.direction.vector.y = 0.0
@@ -103,10 +115,10 @@ class ArmController(object):
         return [grasp]
 
     # Template function, you can add parameters if needed!
-    def plan_grasp(self, x, y, z, roll, pitch, yaw):
+    def plan_grasp(self, x, y, z, roll, pitch, yaw, width):
         self.add_object('object', [0.37, -0.24, 0.1, math.pi, 0., 0.], [0.1, 0.1, 0.1])
 
-        grasps = self._create_grasp(x, y, z, roll, pitch, yaw)
+        grasps = self._create_grasp(x, y, z, roll, pitch, yaw, width)
         result = self.arm.pick('object', grasps, plan_only=True)
         self.remove_object()
 
@@ -118,10 +130,10 @@ class ArmController(object):
             print
             'Failed grasp'
             return False
-    def grasp(self, x, y, z, roll, pitch, yaw):
+    def grasp(self, x, y, z, roll, pitch, yaw, width):
         self.add_object('object', [0.37, -0.24, 0.1, math.pi , 0., 0.], [0.1, 0.1, 0.1])
 
-        grasps = self._create_grasp(x, y, z, roll, pitch, yaw)
+        grasps = self._create_grasp(x, y, z, roll, pitch, yaw, width)
         result = self.arm.pick('object', grasps)
         self.remove_object()
 
@@ -138,9 +150,24 @@ class ArmController(object):
         rospy.sleep(2.0)
 
     def close_fingers(self):
-        self.gripper.set_joint_value_target([1.3, 1.3])
+        self.gripper.set_joint_value_target([1.2, 1.2])
         self.gripper.go(wait=True)
         rospy.sleep(2.0)
+
+    def set_fingers_width(self, width):
+        theta = self.width_to_angle(width)
+        self.gripper.set_joint_value_target([theta, theta])
+        self.gripper.go(wait=True)
+        rospy.sleep(2.0)
+
+    def width_to_angle(self, width):
+        width = np.clip(width, 0, 0.11)
+        b = 0.031
+        x = b - width / 2.
+        h = 0.045
+        alpha = np.arcsin(x / h)
+        gamma = np.radians(124.5)
+        return gamma - np.pi / 2. + alpha
 
     def move_to(self, x, y, z, roll, pitch, yaw, frame_id ="m1n6s200_link_base"):
         q = quaternion_from_euler(roll, pitch, yaw)
