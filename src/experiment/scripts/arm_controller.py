@@ -93,12 +93,12 @@ class ArmController(object):
         # grasp.grasp_pose.header.frame_id = "camera_depth_optical_frame"
 
         # post_grasp
-        grasp.post_grasp_retreat.direction.header.frame_id = self.end_effector_link
-        grasp.post_grasp_retreat.direction.vector.z = -1.0
+        grasp.post_grasp_retreat.direction.header.frame_id = "m1n6s200_link_base"
+        grasp.post_grasp_retreat.direction.vector.z = 1.0
         grasp.post_grasp_retreat.direction.vector.x = 0.0
         grasp.post_grasp_retreat.direction.vector.y = 0.0
         grasp.post_grasp_retreat.min_distance = 0.05
-        grasp.post_grasp_retreat.desired_distance = 0.25
+        grasp.post_grasp_retreat.desired_distance = 0.35
 
         return [grasp]
 
